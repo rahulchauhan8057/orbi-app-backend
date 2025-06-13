@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -150,6 +150,36 @@ class AuthController extends Controller
         return response()->json([
             'status'  => true,
             'message' => 'OTP sent to phone for login.'
+        ]);
+    }
+
+   public function logout(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user && $user->currentAccessToken()) {
+            $user->currentAccessToken()->delete();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Logged out successfully.'
+            ]);
+        }
+
+        return response()->json([
+            'status' => false,
+            'message' => 'User not authenticated or token missing.'
+        ], 401);
+    }
+
+    public function userProfile(Request $request)
+    {
+        $user = $request->user();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'User profile fetched successfully.',
+            'user' => $user
         ]);
     }
 }

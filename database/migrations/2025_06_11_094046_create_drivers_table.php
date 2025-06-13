@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('alternative_no')->nullable();
             $table->string('profile')->nullable();
             $table->date('dob')->nullable();
+            $table->string('otp')->nullable();
+            $table->timestamp('otp_expires_at')->nullable();
             $table->string('vehicle_brand')->nullable();
             $table->string('vehicle_plate_no')->nullable();
             $table->string('vehicle_photo')->nullable();

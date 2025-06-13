@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('rides', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('driver_id')->constrained()->onDelete('cascade');
+            $table->string('user_id')->nullable();
+            $table->string('driver_id')->nullable();
             $table->string('pick_up_location')->nullable();
             $table->string('drop_location')->nullable();
             $table->decimal('final_amount', 10, 2);

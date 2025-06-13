@@ -13,7 +13,7 @@ return new class extends Migration
     {
        Schema::create('driver_verifications', function (Blueprint $table) {
             $table->id();
-            $table->string('driver_id')->nullable();
+            $table->unsignedBigInteger('driver_id')->nullable();
 
             $table->string('licence_no')->nullable();
             $table->string('licence_front_photo')->nullable();
