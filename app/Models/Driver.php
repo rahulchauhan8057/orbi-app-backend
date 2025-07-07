@@ -26,5 +26,9 @@ class Driver extends Model
         'commercial_permit_year',
         'status',
     ];
+    public function verification()
+    {
+        return $this->hasOne(DriverVerification::class);
+    }
 
 }

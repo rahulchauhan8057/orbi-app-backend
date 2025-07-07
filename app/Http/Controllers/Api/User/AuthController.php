@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\User;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -14,13 +15,13 @@ class AuthController extends Controller
     public function submitSignupDetails(Request $request, TwilioService $twilio)
     {
         $validator = Validator::make($request->all(), [
-            'firstname'     => 'required|string|max:255',
-            'lastname'      => 'nullable|string|max:255',
+            'firstName'     => 'required|string|max:255',
+            'lastName'      => 'nullable|string|max:255',
             'email'         => 'required|email|unique:users,email',
-            'phone_no'      => 'required|digits:10|unique:users,phone_no',
-            'alternative_no'=> 'nullable|digits:10',
-            'dob'           => 'nullable',
-            'gender'        => 'nullable',
+            'phone'      => 'required|digits:10|unique:users,phone_no',
+            'alternativeNumber'=> 'nullable|digits:10',
+            'dob'           => 'required',
+            'gender'        => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -30,11 +31,11 @@ class AuthController extends Controller
         $otp = rand(1000, 9999);
 
         $user = User::create([
-            'firstname'      => $request->firstname,
-            'lastname'       => $request->lastname,
+            'firstname'      => $request->firstName,
+            'lastname'       => $request->lastName,
             'email'          => $request->email,
-            'phone_no'       => $request->phone_no,
-            'alternative_no' => $request->alternative_no,
+            'phone_no'       => $request->phone,
+            'alternative_no' => $request->alternativeNumber,
             'dob'            => $request->dob,
             'gender'         => $request->gender,
             'otp'            => $otp,
@@ -59,7 +60,7 @@ class AuthController extends Controller
     public function verifyOtp(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'phone_no' => 'required|digits:10|exists:users,phone_no',
+            'phone' => 'required|digits:10|exists:users,phone_no',
             'otp'          => 'required|digits:4',
         ]);
 
@@ -67,7 +68,7 @@ class AuthController extends Controller
             return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
         }
 
-        $user = User::where('phone_no', $request->phone_no)
+        $user = User::where('phone_no', $request->phone)
             ->where('otp', $request->otp)
             ->where('otp_expires_at', '>', now())
             ->first();
@@ -90,7 +91,7 @@ class AuthController extends Controller
             'status'  => true,
             'message' => 'OTP verified successfully.',
             'token'   => $token,
-            'user'    => $user,
+            'user'    => new UserResource($user),
         ]);
     }
 
@@ -98,14 +99,14 @@ class AuthController extends Controller
     public function resendOtp(Request $request, TwilioService $twilio)
     {
         $validator = Validator::make($request->all(), [
-            'phone_no' => 'required|digits:10|exists:users,phone_no',
+            'phone' => 'required|digits:10|exists:users,phone_no',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
         }
 
-        $user = User::where('phone_no', $request->phone_no)->first();
+        $user = User::where('phone_no', $request->phone)->first();
 
         $otp = rand(1000, 9999);
         $user->otp = $otp;
@@ -127,13 +128,13 @@ class AuthController extends Controller
     public function login(Request $request, TwilioService $twilio)
     {
         $validator = Validator::make($request->all(), [
-            'phone_no' => 'required|digits:10|exists:users,phone_no',
+            'phone' => 'required|digits:10|exists:users,phone_no',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
         }
-        $user = User::where('phone_no', $request->phone_no)->first();
+        $user = User::where('phone_no', $request->phone)->first();
 
         $otp = rand(1000, 9999);
         $user->otp = $otp;
@@ -179,7 +180,7 @@ class AuthController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'User profile fetched successfully.',
-            'user' => $user
+            'user' => new UserResource($user)
         ]);
     }
 }
